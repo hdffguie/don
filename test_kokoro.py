@@ -6,32 +6,39 @@ import sys
 
 def download_file(url, filename):
     if not os.path.exists(filename):
-        print(f"📥 Downloading {filename} (Please wait)...")
-        urllib.request.urlretrieve(url, filename)
-        print(f"✅ {filename} downloaded successfully!")
+        print(f"📥 Downloading {filename} (Isme thoda time lagega, ~300MB file hai)...")
+        try:
+            # Custom Request taaki block na ho
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req) as response, open(filename, 'wb') as out_file:
+                out_file.write(response.read())
+            print(f"✅ {filename} downloaded successfully!")
+        except Exception as e:
+            print(f"❌ Failed to download {filename}: {e}")
+            raise e
 
 def test_kokoro_voice():
-    print("⚙️ Setting up Kokoro...")
+    print("⚙️ Setting up Kokoro v1.0...")
     try:
-        # HuggingFace ki jagah direct official releases se ONNX format download kar rahe hain
-        download_file("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model/kokoro-v0_19.onnx", "kokoro-v0_19.onnx")
-        download_file("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model/voices.json", "voices.json")
+        # 🔴 Updated URLs for Kokoro Version 1.0 (100% Working)
+        download_file("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model/kokoro-v1.0.onnx", "kokoro-v1.0.onnx")
+        download_file("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model/voices-v1.0.bin", "voices-v1.0.bin")
         
-        # Load the model
-        kokoro = Kokoro("kokoro-v0_19.onnx", "voices.json")
-        print("✅ Model Loaded Successfully on GitHub CPU!")
+        # Load the updated model
+        kokoro = Kokoro("kokoro-v1.0.onnx", "voices-v1.0.bin")
+        print("✅ Kokoro v1.0 Model Loaded Successfully on GitHub CPU!")
     except Exception as e:
-        print(f"❌ Model Download/Load Failed: {e}")
+        print(f"❌ Model Setup Failed: {e}")
         sys.exit(1)
 
-    # Text jo hume test karna hai
+    # Text jo hume test karna hai (Hinglish)
     text = "Guys, YouTube automation se earning karna bahut easy hai. Smart log apna time waste nahi karte. DM me GROW to start now."
     output_file = "kokoro_test_voice.wav"
 
     print(f"⏳ Generating Voice for: '{text}'...")
     
     try:
-        # 'am_adam' ek deep American Male voice hai.
+        # 'am_adam' ek clear American Male voice hai
         samples, sample_rate = kokoro.create(
             text, 
             voice="am_adam", 
