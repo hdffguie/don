@@ -1,10 +1,10 @@
-name: 🧪 Test Kokoro AI Voice
+name: 🧪 Test Piper AI Voice
 
 on:
-  workflow_dispatch:  # Manual run button
+  workflow_dispatch:
 
 jobs:
-  test-kokoro-tts:
+  test-piper-tts:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -15,19 +15,20 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Linux System Dependencies (For pronunciation)
+    - name: Install Piper TTS
       run: |
-        sudo apt-get update
-        sudo apt-get install -y espeak-ng
+        # Download official Piper binary for Linux
+        wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_linux_x86_64.tar.gz
+        tar -xf piper_linux_x86_64.tar.gz
+        # Add piper to system path
+        sudo cp piper/piper /usr/local/bin/
+        sudo cp -r piper/espeak-ng-data /usr/local/share/
 
-    - name: Install Python Libraries
-      run: pip install kokoro-onnx soundfile huggingface_hub phonemizer
-
-    - name: Run Kokoro Test Script
-      run: python test_kokoro.py
+    - name: Run Piper Test Script
+      run: python test_piper.py
 
     - name: Upload Audio for Download 🎧
       uses: actions/upload-artifact@v4
       with:
-        name: Kokoro_Test_Audio
-        path: kokoro_test_voice.wav
+        name: Piper_Test_Audio
+        path: piper_test_voice.wav
