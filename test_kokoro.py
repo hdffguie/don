@@ -1,17 +1,24 @@
+import os
+import urllib.request
 import soundfile as sf
-from huggingface_hub import hf_hub_download
 from kokoro_onnx import Kokoro
 import sys
 
+def download_file(url, filename):
+    if not os.path.exists(filename):
+        print(f"📥 Downloading {filename} (Please wait)...")
+        urllib.request.urlretrieve(url, filename)
+        print(f"✅ {filename} downloaded successfully!")
+
 def test_kokoro_voice():
-    print("📥 Downloading Kokoro AI Model (Only runs once)...")
+    print("⚙️ Setting up Kokoro...")
     try:
-        # Download lightweight ONNX model from Hugging Face
-        model_path = hf_hub_download(repo_id="hexgrad/Kokoro-82M", filename="kokoro-v0_19.onnx")
-        voices_path = hf_hub_download(repo_id="hexgrad/Kokoro-82M", filename="voices.json")
+        # HuggingFace ki jagah direct official releases se ONNX format download kar rahe hain
+        download_file("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model/kokoro-v0_19.onnx", "kokoro-v0_19.onnx")
+        download_file("https://github.com/thewh1teagle/kokoro-onnx/releases/download/model/voices.json", "voices.json")
         
         # Load the model
-        kokoro = Kokoro(model_path, voices_path)
+        kokoro = Kokoro("kokoro-v0_19.onnx", "voices.json")
         print("✅ Model Loaded Successfully on GitHub CPU!")
     except Exception as e:
         print(f"❌ Model Download/Load Failed: {e}")
