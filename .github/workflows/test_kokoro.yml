@@ -1,0 +1,33 @@
+name: 🧪 Test Kokoro AI Voice
+
+on:
+  workflow_dispatch:  # Manual run button
+
+jobs:
+  test-kokoro-tts:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Linux System Dependencies (For pronunciation)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y espeak-ng
+
+    - name: Install Python Libraries
+      run: pip install kokoro-onnx soundfile huggingface_hub phonemizer
+
+    - name: Run Kokoro Test Script
+      run: python test_kokoro.py
+
+    - name: Upload Audio for Download 🎧
+      uses: actions/upload-artifact@v4
+      with:
+        name: Kokoro_Test_Audio
+        path: kokoro_test_voice.wav
