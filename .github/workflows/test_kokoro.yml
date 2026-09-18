@@ -16,13 +16,7 @@ jobs:
         python-version: '3.10'
 
     - name: Install Piper TTS
-      run: |
-        # Download official Piper binary for Linux
-        wget https://github.com/rhasspy/piper/releases/download/v1.2.0/piper_linux_x86_64.tar.gz
-        tar -xf piper_linux_x86_64.tar.gz
-        # Add piper to system path
-        sudo cp piper/piper /usr/local/bin/
-        sudo cp -r piper/espeak-ng-data /usr/local/share/
+      run: pip install piper-tts
 
     - name: Run Piper Test Script
       run: python test_piper.py
