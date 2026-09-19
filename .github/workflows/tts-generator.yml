@@ -1,0 +1,56 @@
+name: Generate Hindi AI Voice with IndicF5
+
+on:
+  workflow_dispatch:
+    inputs:
+      hindi_text:
+        description: 'Jo Hindi/Hinglish text bolwana hai wo likhein'
+        required: true
+        default: 'नमस्ते भाई! यह आवाज़ गिटहब ऐक्शन्स के थ्रू जनरेट हो रही है।'
+      ref_text:
+        description: 'Reference audio ka text (Tone guide)'
+        required: true
+        default: 'यह एक सैंपल ऑडियो का टेक्स्ट है।'
+
+jobs:
+  generate-voice:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Repository ka code checkout karein
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # 2. Python Setup karein (GitHub free runner par CPU efficient rahega)
+    - name: Set up Python 3.10
+      uses: actions/experiments/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    # 3. Audio tools (ffmpeg) install karein jo audio format ke liye zaroori hai
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+
+    # 4. IndicF5 aur uske zaroori packages install karein
+    - name: Install IndicF5 and Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install git+https://github.com/ai4bharat/IndicF5.git
+        pip install transformers soundfile numpy torch --extra-index-url https://pytorch.org
+
+    # 5. Model run karke audio file generate karein
+    - name: Run IndicF5 TTS Script
+      env:
+        HINDI_TEXT: ${{ github.event.inputs.hindi_text }}
+        REF_TEXT: ${{ github.event.inputs.ref_text }}
+      run: |
+        python script_tts.py
+
+    # 6. Generated .wav file ko GitHub par download ke liye upload karein
+    - name: Upload Output Audio
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-hindi-voice
+        path: hindi_output.wav
