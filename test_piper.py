@@ -1,40 +1,70 @@
 import os
-import urllib.request
+import requests
 import subprocess
 import sys
 
-def download_file(url, filename):
+REPO_ID = "rhasspy/piper-voices"
+BRANCH = "main"
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+
+def list_hf_directory(path):
+    """HuggingFace repo ke andar ki files/folders ki list nikalta hai"""
+    url = f"https://huggingface.co/api/models/{REPO_ID}/tree/{BRANCH}/{path}"
+    try:
+        r = requests.get(url, headers=HEADERS, timeout=15)
+        r.raise_for_status()
+        return r.json()
+    except Exception as e:
+        print(f"⚠️ Could not list directory {path}: {e}")
+        return []
+
+def find_hindi_voice():
+    """Hindi (hi) folder ke andar jaakar automatically pehli available voice dhoondhta hai"""
+    print("🔍 Scanning HuggingFace for available Hindi voices...")
+    
+    level1 = list_hf_directory("hi")  # e.g., hi_IN
+    for item1 in level1:
+        if item1["type"] == "directory":
+            lang_path = item1["path"]  # hi/hi_IN
+            level2 = list_hf_directory(lang_path)
+            
+            for item2 in level2:
+                if item2["type"] == "directory":
+                    voice_path = item2["path"]  # hi/hi_IN/xxxxx
+                    level3 = list_hf_directory(voice_path)
+                    
+                    for item3 in level3:
+                        if item3["type"] == "directory":
+                            quality_path = item3["path"]  # hi/hi_IN/xxxxx/medium
+                            level4 = list_hf_directory(quality_path)
+                            
+                            for file in level4:
+                                if file["path"].endswith(".onnx"):
+                                    onnx_path = file["path"]
+                                    json_path = onnx_path + ".json"
+                                    print(f"🎯 Found Voice: {onnx_path}")
+                                    return onnx_path, json_path
+    return None, None
+
+def download_file(path, filename):
     if not os.path.exists(filename):
-        print(f"📥 Downloading {filename}...")
-        # Browser ka natak karna (Spoofing) taaki HF block na kare
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'})
-        try:
-            with urllib.request.urlopen(req) as response, open(filename, 'wb') as out_file:
-                out_file.write(response.read())
+        url = f"https://huggingface.co/{REPO_ID}/resolve/{BRANCH}/{path}"
+        print(f"📥 Downloading {filename} from {url}...")
+        r = requests.get(url, headers=HEADERS, timeout=60)
+        if r.status_code == 200:
+            with open(filename, "wb") as f:
+                f.write(r.content)
             print(f"✅ {filename} Downloaded Successfully!")
-        except Exception as e:
-            print(f"❌ Error downloading {filename}: {e}")
+        else:
+            print(f"❌ Failed with status {r.status_code}")
             sys.exit(1)
 
-def download_piper_model():
-    # 🔴 Fixed URL: 'main' ki jagah 'v1.0.0' use kiya hai jo kabhi delete nahi hoga
-    base_url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/amit/medium/hi_IN-amit-medium.onnx"
-    config_url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/amit/medium/hi_IN-amit-medium.onnx.json"
-    
-    download_file(base_url, "model.onnx")
-    download_file(config_url, "model.onnx.json")
-
 def generate_voice():
-    # Aapki Hindi Script
     text = "दोस्तों, यूट्यूब ऑटोमेशन से पैसा कमाना बहुत आसान है। स्मार्ट लोग अपना टाइम बर्बाद नहीं करते।"
     output_file = "piper_test_voice.wav"
     
     print(f"⏳ Generating High-Quality Voice for: '{text}'...")
-    
-    # Text ko terminal string me convert karna
     safe_text = text.replace('"', '\\"').replace("'", "\\'")
-    
-    # Python ke andar bash command run karna
     cmd = f'echo "{safe_text}" | piper --model model.onnx --output_file {output_file}'
     
     try:
@@ -44,5 +74,11 @@ def generate_voice():
         print(f"❌ Voice Generation Failed: {e}")
 
 if __name__ == "__main__":
-    download_piper_model()
-    generate_voice()
+    onnx_path, json_path = find_hindi_voice()
+    
+    if onnx_path:
+        download_file(onnx_path, "model.onnx")
+        download_file(json_path, "model.onnx.json")
+        generate_voice()
+    else:
+        print("❌ No Hindi voice found in the repository!")
