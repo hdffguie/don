@@ -1,28 +1,53 @@
-name: 🧪 Test Piper AI Voice
+name: Free Unlimited AI Voice Generator
 
 on:
   workflow_dispatch:
+    inputs:
+      ref_text:
+        description: 'आपकी 9 सेकंड की sample.wav फाइल में आपने जो बोला है, वो टेक्स्ट यहाँ लिखें (Reference Text)'
+        required: true
+        default: 'Hello, this is my short voice recording.'
+      text_to_speak:
+        description: 'जो नया टेक्स्ट आप अपनी आवाज़ में बुलवाना चाहते हैं (Target Text)'
+        required: true
+        default: 'नमस्कार दोस्तों, यह मेरी खुद की क्लोन की हुई एआई आवाज़ है जो बिल्कुल फ्री में काम कर रही है।'
 
 jobs:
-  test-piper-tts:
+  clone-and-speak:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout Repository
+    - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Setup Python
+    - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
 
-    - name: Install Piper TTS & Requests
-      run: pip install piper-tts requests
+    - name: Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg libsndfile1
 
-    - name: Run Piper Test Script
-      run: python test_piper.py
+    - name: Install PyTorch (CPU Version)
+      run: |
+        pip install torch torchaudio --index-url https://pytorch.org
 
-    - name: Upload Audio for Download 🎧
+    - name: Install F5-TTS
+      run: |
+        pip install git+https://github.com
+
+    - name: Generate Cloned Voice Audio
+      run: |
+        f5-tts_infer \
+          --ref_audio "sample.wav" \
+          --ref_text "${{ github.event.inputs.ref_text }}" \
+          --gen_text "${{ github.event.inputs.text_to_speak }}" \
+          --output "my_cloned_voice.wav"
+
+    - name: Upload Generated Audio File
       uses: actions/upload-artifact@v4
       with:
-        name: Piper_Test_Audio
-        path: piper_test_voice.wav
+        name: Cloned-Voice-Output
+        path: my_cloned_voice.wav
