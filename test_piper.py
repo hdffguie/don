@@ -60,7 +60,7 @@ def download_file(path, filename):
             sys.exit(1)
 
 def generate_voice():
-    text = "'Guys, YouTube automation se earning karna bahut easy hai. Smart log time waste nahi karte"
+    text = "दोस्तों, क्या आप भी बिना अपना चेहरा दिखाए, बिना कैमरा खरीदे और बिना भारी-भरकम सेटअप के हर महीने लाखों रुपये कमाना चाहते हैं? सुनने में यह एक सपने जैसा लगता है ना? लेकिन आज के डिजिटल दौर में यह 100% मुमकिन है!"
     output_file = "piper_test_voice.wav"
     
     print(f"⏳ Generating High-Quality Voice for: '{text}'...")
