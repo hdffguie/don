@@ -1,16 +1,16 @@
-name: Generate Hindi Realistic TTS
+name: Generate Male Hindi TTS using XTTS-v2
 
 on:
   workflow_dispatch:
     inputs:
-      text_input:
-        description: 'Hindi text to convert into speech'
+      hindi_text:
+        description: 'Enter Hindi Text for Male Voice'
         required: true
-        default: 'नमस्ते, यह GitHub Actions से generate की गई realistic आवाज़ है।'
+        default: 'नमस्ते, यह XTTS-v2 मॉडल से जनरेट की गई एक पुरुष की आवाज़ है।'
         type: string
 
 jobs:
-  build-tts:
+  generate-audio:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,18 +22,20 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install edge-tts
+          pip install requests
 
-      - name: Generate Speech Audio
+      - name: Run TTS Generation Script
+        env:
+          HUGGINGFACE_TOKEN: ${{ secrets.HF_TOKEN }}
+          INPUT_TEXT: ${{ github.event.inputs.hindi_text }}
         run: |
-          # Microsoft Neural Hindi voice (SwaraNeural / MadhurNeural are extremely realistic)
-          edge-tts --voice hi-IN-SwaraNeural --text "${{ github.event.inputs.text_input }}" --write-media output.mp3
+          python generate_xtts.py
 
       - name: Upload Audio Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hindi-speech-audio
-          path: output.mp3
+          name: hindi-male-speech
+          path: male_output.wav
