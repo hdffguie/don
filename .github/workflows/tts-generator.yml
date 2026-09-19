@@ -39,10 +39,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install transformers soundfile numpy torch --extra-index-url https://pytorch.org
 
-    # 5. IndicF5 Model repository ko separate command se install karein
+    # 5. IndicF5 Model repository ko full safe URL string ke sath install karein
     - name: Install IndicF5 Model Repo
       run: |
-        pip install git+https://github.com
+        pip install "git+https://github.com"
 
     # 6. Model run karke audio file generate karein
     - name: Run IndicF5 TTS Script
