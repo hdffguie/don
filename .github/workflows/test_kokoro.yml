@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       ref_text:
-        description: 'आपकी 9 सेकंड की sample.wav फाइल में आपने जो बोला है, वो टेक्स्ट यहाँ लिखें (Reference Text)'
+        description: 'आपकी 9 सेकंड की sample.wav फाइल में आपने जो बोला है, वो टेक्स्ट हूबहू यहाँ लिखें'
         required: true
         default: 'Hello, this is my short voice recording.'
       text_to_speak:
@@ -30,7 +30,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ffmpeg libsndfile1
 
-    - name: Install PyTorch (CPU Version)
+    - name: Install PyTorch (CPU Version Fix)
       run: |
         pip install torch torchaudio --index-url https://pytorch.org
 
