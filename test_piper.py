@@ -1,17 +1,28 @@
 import os
 import urllib.request
 import subprocess
+import sys
+
+def download_file(url, filename):
+    if not os.path.exists(filename):
+        print(f"📥 Downloading {filename}...")
+        # Browser ka natak karna (Spoofing) taaki HF block na kare
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'})
+        try:
+            with urllib.request.urlopen(req) as response, open(filename, 'wb') as out_file:
+                out_file.write(response.read())
+            print(f"✅ {filename} Downloaded Successfully!")
+        except Exception as e:
+            print(f"❌ Error downloading {filename}: {e}")
+            sys.exit(1)
 
 def download_piper_model():
-    # Amit (Medium Quality) - Ekdum saaf Hindi bolta hai
-    model_url = "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/amit/medium/hi_IN-amit-medium.onnx"
-    config_url = "https://huggingface.co/rhasspy/piper-voices/resolve/main/hi/hi_IN/amit/medium/hi_IN-amit-medium.onnx.json"
+    # 🔴 Fixed URL: 'main' ki jagah 'v1.0.0' use kiya hai jo kabhi delete nahi hoga
+    base_url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/amit/medium/hi_IN-amit-medium.onnx"
+    config_url = "https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/hi/hi_IN/amit/medium/hi_IN-amit-medium.onnx.json"
     
-    if not os.path.exists("model.onnx"):
-        print("📥 Downloading Piper Hindi Model (Permanent HF Link)...")
-        urllib.request.urlretrieve(model_url, "model.onnx")
-        urllib.request.urlretrieve(config_url, "model.onnx.json")
-        print("✅ Model Downloaded Successfully!")
+    download_file(base_url, "model.onnx")
+    download_file(config_url, "model.onnx.json")
 
 def generate_voice():
     # Aapki Hindi Script
