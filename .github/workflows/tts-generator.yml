@@ -6,7 +6,7 @@ on:
       hindi_text:
         description: 'Jo Hindi/Hinglish text bolwana hai wo likhein'
         required: true
-        default: 'नमस्ते भाई! यह आवाज़ गिटहब ऐक्शन्स के थ्रू जनरेट हो रही है।'
+        default: 'नमस्ते भाई! यह आवाज़ गिटहब ऐक्शन्स के थ्रू जनरेट हो रही है।'
       ref_text:
         description: 'Reference audio ka text (Tone guide)'
         required: true
@@ -39,10 +39,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install transformers soundfile numpy torch --extra-index-url https://pytorch.org
 
-    # 5. IndicF5 Model repository ko full safe URL string ke sath install karein
+    # 5. IndicF5 Model repository ko official AI4Bharat link ke sath install karein
     - name: Install IndicF5 Model Repo
       run: |
-        pip install "git+https://github.com"
+        pip install "git+https://github.com/ai4bharat/IndicF5.git"
 
     # 6. Model run karke audio file generate karein
     - name: Run IndicF5 TTS Script
