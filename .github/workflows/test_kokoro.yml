@@ -15,8 +15,8 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install Piper TTS
-      run: pip install piper-tts
+    - name: Install Piper TTS & Requests
+      run: pip install piper-tts requests
 
     - name: Run Piper Test Script
       run: python test_piper.py
