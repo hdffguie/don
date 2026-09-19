@@ -1,0 +1,39 @@
+name: Generate Hindi Realistic TTS
+
+on:
+  workflow_dispatch:
+    inputs:
+      text_input:
+        description: 'Hindi text to convert into speech'
+        required: true
+        default: 'नमस्ते, यह GitHub Actions से generate की गई realistic आवाज़ है।'
+        type: string
+
+jobs:
+  build-tts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install edge-tts
+
+      - name: Generate Speech Audio
+        run: |
+          # Microsoft Neural Hindi voice (SwaraNeural / MadhurNeural are extremely realistic)
+          edge-tts --voice hi-IN-SwaraNeural --text "${{ github.event.inputs.text_input }}" --write-media output.mp3
+
+      - name: Upload Audio Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hindi-speech-audio
+          path: output.mp3
