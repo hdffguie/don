@@ -3,7 +3,7 @@ name: VibeVoice Hindi Text-to-Speech
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # इसे आप GitHub UI से मैन्युअली भी रन कर सकते हैं
+  workflow_dispatch: 
 
 jobs:
   convert-text-to-speech:
@@ -17,16 +17,14 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        cache: 'pip'
+        # एरर ठीक करने के लिए कैशिंग विकल्प को यहाँ से हटा दिया गया है
 
-    # तेजी से पैकेजेस इंस्टॉल करने के लिए uv का उपयोग करें
     - name: Install uv and VibeVoice Dependencies
       run: |
         curl -LsSf https://astral.sh | sh
         echo "$HOME/.local/bin" >> $GITHUB_PATH
         
-        # VibeVoice कम्युनिटी रिपोजिटरी को क्लोन करके इंस्टॉल करें
-        git clone https://github.com/vibevoice-community/VibeVoice.git
+        git clone https://github.com
         cd VibeVoice
         uv pip install --system -e .
         uv pip install --system huggingface_hub scipy torch
@@ -35,7 +33,6 @@ jobs:
       run: |
         python generate_speech.py
 
-    # जनरेट हुई ऑडियो (.wav) फ़ाइल को डाउनलोड करने योग्य बनाने के लिए अपलोड करें
     - name: Upload Generated Audio Artifact
       uses: actions/upload-artifact@v4
       with:
