@@ -1,39 +1,43 @@
-name: Generate Real Hindi TTS
+name: VibeVoice Hindi Text-to-Speech
 
 on:
-  workflow_dispatch:
-    inputs:
-      text_input:
-        description: 'Enter Hindi text'
-        required: true
-        default: 'नमस्ते, यह एकदम असली पुरुष की आवाज़ है।'
-        type: string
+  push:
+    branches: [ main ]
+  workflow_dispatch: # इसे आप GitHub UI से मैन्युअली भी रन कर सकते हैं
 
 jobs:
-  build-tts:
+  convert-text-to-speech:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install edge-tts
+    # तेजी से पैकेजेस इंस्टॉल करने के लिए uv का उपयोग करें
+    - name: Install uv and VibeVoice Dependencies
+      run: |
+        curl -LsSf https://astral.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+        
+        # VibeVoice कम्युनिटी रिपोजिटरी को क्लोन करके इंस्टॉल करें
+        git clone https://github.com/vibevoice-community/VibeVoice.git
+        cd VibeVoice
+        uv pip install --system -e .
+        uv pip install --system huggingface_hub scipy torch
 
-      - name: Generate Speech Audio
-        run: |
-          # hi-IN-MadhurNeural ek bahut hi badiya aur natural Male voice hai
-          edge-tts --voice hi-IN-MadhurNeural --text "${{ github.event.inputs.text_input }}" --write-media male_output.mp3
+    - name: Run Hindi TTS Script
+      run: |
+        python generate_speech.py
 
-      - name: Upload Audio Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: hindi-speech-audio
-          path: male_output.mp3
+    # जनरेट हुई ऑडियो (.wav) फ़ाइल को डाउनलोड करने योग्य बनाने के लिए अपलोड करें
+    - name: Upload Generated Audio Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: hindi-voice-audio
+        path: hindi_output.wav
